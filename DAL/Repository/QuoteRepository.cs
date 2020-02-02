@@ -31,16 +31,14 @@ namespace DAL.Repository
 
             if (records != null)
             {
-                var sql = @$"INSERT INTO Users ( Quote, AuthorId )
+                var sql = @$"INSERT INTO Quotes ( Quote, AuthorId )
 VALUES (@{nameof(QuoteDto.Quote)}, @{nameof(QuoteDto.AuthorId)})
 ";
 
                 Log.Trace("SQL statement prepared:");
                 Log.Debug(sql);
 
-                using var transaction = Connection.BeginTransaction();
-                result = Connection.ExecuteAsync(sql, records, transaction);
-                transaction.Commit();
+                result = Connection.ExecuteAsync(sql, records);
             }
             else
             {
@@ -75,9 +73,7 @@ VALUES (@{nameof(QuoteDto.Quote)}, @{nameof(QuoteDto.AuthorId)})
                 Log.Trace("SQL statement prepared:");
                 Log.Debug(sql);
 
-                using var transaction = Connection.BeginTransaction();
-                result = Connection.ExecuteAsync(sql, ids, transaction);
-                transaction.Commit();
+                result = Connection.ExecuteAsync(sql, ids);
             }
             else
             {
@@ -131,13 +127,13 @@ FROM Quotes
 
             if (!records?.Any() ?? true)
             {
-                Log.Error($"No gifts to update.");
-                throw new ArgumentException("No gifts to update.");
+                Log.Error($"No quotes to update.");
+                throw new ArgumentException("No quotes to update.");
             }
 
             Log.Trace("Preparing SQL statement...");
 
-            var sql = $@"UPDATE Gifts
+            var sql = $@"UPDATE Quotes
 SET  Quote = @{nameof(QuoteDto.Quote)}, AuthorId = @{nameof(QuoteDto.AuthorId)}
 WHERE Id = @{nameof(QuoteDto.Id)}";
 
@@ -146,7 +142,7 @@ WHERE Id = @{nameof(QuoteDto.Id)}";
 
             var result = Connection.ExecuteAsync(sql, records);
 
-            Log.Debug($"{records} gift records updated.");
+            Log.Debug($"{records} quotes records updated.");
 
             Log.Trace($"{nameof(QuoteRepository)}.{nameof(Update)} execution completed.");
 

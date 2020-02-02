@@ -13,68 +13,68 @@ using Xunit;
 
 namespace DAL.Tests
 {
-    public class UserRepositoryIntegrationTests
+    public class QuoteRepositoryIntegrationTests
     {
         private readonly SqlConnection Conn = null;
-        private readonly UserRepository Sut = null;
+        private readonly QuoteRepository Sut = null;
         private readonly ConnectionStringProvider cs = null;
 
-        public UserRepositoryIntegrationTests()
+        public QuoteRepositoryIntegrationTests()
         {
             cs = new ConnectionStringProvider();
 
             Conn = new SqlConnection(cs.ConnectionString);
 
-            var log = new SeriLogFacility<UserRepository>(Log.Logger);
-            Sut = new UserRepository(Conn, log);
+            var log = new SeriLogFacility<QuoteRepository>(Log.Logger);
+            Sut = new QuoteRepository(Conn, log);
 
             FluentMapper.EntityMaps.Clear();
-            FluentMapper.Initialize(cfg => cfg.AddMap(new UserSchema()));
+            FluentMapper.Initialize(cfg => cfg.AddMap(new QuoteSchema()));
             Conn.Open();
         }
 
         [Fact]
         public async void CreateReadDelete()
         {
-            var testUser = new UserDto
+            var testQuote = new QuoteDto
             {
-                Password = DateTime.Now.Ticks.ToString(),
-                Username = DateTime.Now.Ticks.ToString()
+                Quote = DateTime.Now.Ticks.ToString(),
+                AuthorId = 1
             };
 
-            var createTest = await Sut.Create(new[] { testUser });
+            var createTest = await Sut.Create(new[] { testQuote });
 
             Assert.Equal(1, createTest);
 
             var test = await Sut.Read();
 
             Assert.NotNull(test);
-            Assert.IsAssignableFrom<IEnumerable<UserDto>>(test);
+            Assert.IsAssignableFrom<IEnumerable<QuoteDto>>(test);
 
-            var deleteTest = await Sut.Delete(new[] { test.FirstOrDefault().Id ?? 0});
+            var deleteTest = await Sut.Delete(new[] { test.FirstOrDefault().Id ?? 0 });
 
             Assert.Equal(1, deleteTest);
         }
         [Fact]
         public async void CreateReadUpdateReadDelete()
         {
-            var testUser = new UserDto
+            var testQuote = new QuoteDto
             {
-                Password = DateTime.Now.Ticks.ToString(),
-                Username = DateTime.Now.Ticks.ToString()
+                Quote = DateTime.Now.Ticks.ToString(),
+                AuthorId = 1
             };
 
-            var createTest = await Sut.Create(new[] { testUser });
+            var createTest = await Sut.Create(new[] { testQuote });
 
             Assert.Equal(1, createTest);
 
             var readTest = await Sut.Read();
 
             Assert.NotNull(readTest);
-            Assert.IsAssignableFrom<IEnumerable<UserDto>>(readTest);
+            Assert.IsAssignableFrom<IEnumerable<QuoteDto>>(readTest);
 
-            readTest.FirstOrDefault().Username += "1";
-            readTest.FirstOrDefault().Password += "1";
+            readTest.FirstOrDefault().Quote += "1";
+            readTest.FirstOrDefault().AuthorId += 1;
 
             var test = await Sut.Update(new[] { readTest.FirstOrDefault() });
 
@@ -82,7 +82,7 @@ namespace DAL.Tests
 
             var secondReadTest = await Sut.Read();
 
-            var checkValues = secondReadTest.FirstOrDefault().Username == readTest.FirstOrDefault().Username && secondReadTest.FirstOrDefault().Password == readTest.FirstOrDefault().Password;
+            var checkValues = secondReadTest.FirstOrDefault().Quote == readTest.FirstOrDefault().Quote && secondReadTest.FirstOrDefault().AuthorId == readTest.FirstOrDefault().AuthorId;
 
             Assert.True(checkValues);
 

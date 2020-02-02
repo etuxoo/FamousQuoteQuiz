@@ -59,5 +59,24 @@ namespace DAL.Tests
         //    // TODO : Check with integration test
         //    Assert.Equal(3, test.ToList().Count);
         //}
+
+        [Fact]
+        public void UpdateFailWithNullCollection()
+        {
+            Assert.ThrowsAsync<ArgumentException>(() => Sut.Update(null));
+        }
+
+        [Fact]
+        public void UpdateFailWithEmptyCollection()
+        {
+            var collection = new List<UserDto>();
+            Assert.ThrowsAsync<ArgumentException>(() => Sut.Update(collection));
+        }
+
+        [Fact]
+        public void DeleteFailWithNullCollection()
+        {
+            Assert.ThrowsAsync<ArgumentException>(() => Sut.Delete(null));
+        }
     }
 }

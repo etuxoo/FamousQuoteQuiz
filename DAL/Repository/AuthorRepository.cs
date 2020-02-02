@@ -37,9 +37,7 @@ VALUES (@{nameof(AuthorDto.Author)})
                 Log.Trace("SQL statement prepared:");
                 Log.Debug(sql);
 
-                using var transaction = Connection.BeginTransaction();
-                result = Connection.ExecuteAsync(sql, records, transaction);
-                transaction.Commit();
+                result = Connection.ExecuteAsync(sql, records);
             }
             else
             {
@@ -74,9 +72,7 @@ VALUES (@{nameof(AuthorDto.Author)})
                 Log.Trace("SQL statement prepared:");
                 Log.Debug(sql);
 
-                using var transaction = Connection.BeginTransaction();
-                result = Connection.ExecuteAsync(sql, ids, transaction);
-                transaction.Commit();
+                result = Connection.ExecuteAsync(sql, ids);
             }
             else
             {
@@ -123,6 +119,40 @@ FROM Authors
             return result;
         }
 
+        public Task<IEnumerable<AuthorDto>> Read(IEnumerable<string> names)
+        {
+            Log.Trace($"{nameof(AuthorRepository)}.{nameof(Read)} has been invoked.");
+
+            Log.Trace("Preparing SQL statement...");
+
+            var sql = @"SELECT Id, Author
+FROM Authors
+";
+
+            if (names?.Any() ?? false)
+            {
+                var idList = names.Aggregate(string.Empty, (text, id) => text += $"'{id}',")
+                    .TrimEnd(',')
+                    .Replace(",", ", ")
+                ;
+
+                sql += $"WHERE Author IN({idList})";
+
+                Log.Debug($"{nameof(AuthorRepository)}.{nameof(Read)}(names = {names.Count()}) query start. ");
+            }
+
+            Log.Trace("SQL statement prepared:");
+            Log.Debug(sql);
+
+            var result = Connection.QueryAsync<AuthorDto>(sql);
+
+            Log.Debug($"{names?.Count() ?? 0} authors records retrieved.");
+
+            Log.Trace($"{nameof(AuthorRepository)}.{nameof(Read)} execution completed.");
+
+            return result;
+        }
+
         public Task<int> Update(IEnumerable<AuthorDto> records)
         {
             Log.Trace($"{nameof(AuthorRepository)}.{nameof(Update)} has been invoked.");
@@ -130,8 +160,8 @@ FROM Authors
 
             if (!records?.Any() ?? true)
             {
-                Log.Error($"No gifts to update.");
-                throw new ArgumentException("No gifts to update.");
+                Log.Error($"No authors to update.");
+                throw new ArgumentException("No authors to update.");
             }
 
             Log.Trace("Preparing SQL statement...");
@@ -145,7 +175,7 @@ WHERE Id = @{nameof(AuthorDto.Id)}";
 
             var result = Connection.ExecuteAsync(sql, records);
 
-            Log.Debug($"{records} gift records updated.");
+            Log.Debug($"{records} author records updated.");
 
             Log.Trace($"{nameof(AuthorRepository)}.{nameof(Update)} execution completed.");
 
