@@ -1,0 +1,55 @@
+﻿@page "/bynaryQuotes"
+@using DAL.Repository
+@using DAL.Dto
+@using System.Linq;
+@inject QuoteRepository QuoteRepository
+@inject AuthorRepository AuthorRepository
+
+<style>
+    .quote{
+        background-color:pink;
+        font-size:1.5rem;
+        color:white;
+    }
+    .yes-btn{
+        background-color:green;
+        color:white;
+    }
+    .no-btn {
+        background-color: red;
+        color: white;
+    }
+</style>
+
+<div class="rounded quote">
+    @quote
+</div>
+<div>
+    @author
+</div>
+<div>
+    <button class="yes-btn">Yes</button>
+    <button class="no-btn">No</button>
+</div>
+
+
+
+@code {
+    private string quote = null;
+    private QuoteDto quoteDto = null;
+    private List<QuoteDto> list = null;
+    private string author = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var innerList= await QuoteRepository.Read();
+
+        var array = new int[10];
+
+        for (int i = 0; i < (innerList.Count()<10 ? innerList.Count() : 0); i++)
+        {
+            var random = new Random();
+            array.Append(random.Next(0,innerList.Count()));
+        }
+    }
+}

@@ -11,6 +11,8 @@ namespace DAL.Repository
 {
     public class UserRepository : IRepository<UserDto>
     {
+        // TODO : Create and use DbModels
+
         private readonly IDbConnection Connection = null;
         private readonly ILogFacility<UserRepository> Log = null;
 
@@ -113,6 +115,40 @@ FROM Users
             var result = Connection.QueryAsync<UserDto>(sql);
 
             Log.Debug($"{ids?.Count() ?? 0} user records retrieved.");
+
+            Log.Trace($"{nameof(UserRepository)}.{nameof(Read)} execution completed.");
+
+            return result;
+        }
+
+        public Task<IEnumerable<UserDto>> Read(IEnumerable<string> names)
+        {
+            Log.Trace($"{nameof(UserRepository)}.{nameof(Read)} has been invoked.");
+
+            Log.Trace("Preparing SQL statement...");
+
+            var sql = @"SELECT Id, Username, Password
+FROM Users
+";
+
+            if (names?.Any() ?? false)
+            {
+                var nameList = names.Aggregate(string.Empty, (text, name) => text += $"'{name}',")
+                    .TrimEnd(',')
+                    .Replace(",", ", ")
+                ;
+
+                sql += $"WHERE Username IN({nameList})";
+
+                Log.Debug($"{nameof(UserRepository)}.{nameof(Read)}(names = {names.Count()}) query start. ");
+            }
+
+            Log.Trace("SQL statement prepared:");
+            Log.Debug(sql);
+
+            var result = Connection.QueryAsync<UserDto>(sql);
+
+            Log.Debug($"{names?.Count() ?? 0} user records retrieved.");
 
             Log.Trace($"{nameof(UserRepository)}.{nameof(Read)} execution completed.");
 

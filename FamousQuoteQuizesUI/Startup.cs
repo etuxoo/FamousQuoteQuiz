@@ -1,7 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using DAL;
+using DAL.Dto;
+using DAL.Repository;
+using DAL.Schema;
+using Dapper.FluentMap;
+using FamousQuoteQuiz.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +17,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using FamousQuoteQuizesUI.Data;
+using Serilog;
 
 namespace FamousQuoteQuizesUI
 {
@@ -26,9 +34,27 @@ namespace FamousQuoteQuizesUI
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            FluentMapper.Initialize(cfg => cfg.AddMap(new UserSchema()));
+            FluentMapper.Initialize(cfg => cfg.AddMap(new QuoteSchema()));
+            FluentMapper.Initialize(cfg => cfg.AddMap(new AuthorSchema()));
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton<LogedUserProvider>();
+            services.AddSingleton(typeof(ILogFacility<>),typeof(SeriLogFacility<>));
+            services.AddSingleton(Log.Logger);
+            services.AddTransient<IDbConnection>(sp =>
+            {
+                var connectionString = new ConnectionStringProvider().ConnectionString;
+                var result = new SqlConnection(connectionString);
+
+                result.Open();
+
+                return result;
+            });
+            services.AddTransient(typeof(IRepository<UserDto>), typeof(UserRepository));
+            services.AddTransient(typeof(IRepository<QuoteDto>), typeof(QuoteRepository));
+            services.AddTransient(typeof(IRepository<AuthorDto>), typeof(AuthorRepository));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
