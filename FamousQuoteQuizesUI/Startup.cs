@@ -38,10 +38,8 @@ namespace FamousQuoteQuizesUI
             FluentMapper.Initialize(cfg => cfg.AddMap(new QuoteSchema()));
             FluentMapper.Initialize(cfg => cfg.AddMap(new AuthorSchema()));
 
-            services.AddRazorPages();
-            services.AddServerSideBlazor();
             services.AddSingleton<LogedUserProvider>();
-            services.AddSingleton(typeof(ILogFacility<>),typeof(SeriLogFacility<>));
+            services.AddSingleton(typeof(ILogFacility<>), typeof(SeriLogFacility<>));
             services.AddSingleton(Log.Logger);
             services.AddTransient<IDbConnection>(sp =>
             {
@@ -55,6 +53,8 @@ namespace FamousQuoteQuizesUI
             services.AddTransient(typeof(IRepository<UserDto>), typeof(UserRepository));
             services.AddTransient(typeof(IRepository<QuoteDto>), typeof(QuoteRepository));
             services.AddTransient(typeof(IRepository<AuthorDto>), typeof(AuthorRepository));
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

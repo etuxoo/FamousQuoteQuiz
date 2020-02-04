@@ -2,8 +2,9 @@
 @using DAL.Repository
 @using DAL.Dto
 @using System.Linq;
-@inject QuoteRepository QuoteRepository
-@inject AuthorRepository AuthorRepository
+@using DAL;
+@inject IRepository<QuoteDto> QuoteRepository
+@inject IRepository<AuthorDto> AuthorRepository
 
 <style>
     .quote{
